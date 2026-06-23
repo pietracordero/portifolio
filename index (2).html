@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pietra Cordero — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+  /* ===== DESIGN TOKENS ===== */
+  :root {
+    --vanilla-cream: #F5EFE3;
+    --aged-paper: #EDE3CF;
+    --parchment: #D9CBAA;
+    --midnight-indigo: #1C2340;
+    --bordeaux: #7B1C2E;
+    --bordeaux-light: #9E2A3F;
+    --warm-grey: #8C8070;
+    --ink-black: #1A1410;
+    --linen-white: #FAF6EE;
+    --silver-accent: #C0B8A8;
+    
+    --font-serif: 'Cormorant Garamond', 'Playfair Display', serif;
+    --font-display: 'Playfair Display', serif;
+    --font-mono: 'Courier Prime', 'Courier New', monospace;
+    --font-script: 'Dancing Script', cursive;
+  }
+
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--vanilla-cream);
+    color: var(--ink-black);
+    font-family: var(--font-serif);
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--bordeaux); color: var(--vanilla-cream); }
+
+  /* ===== TEXTURE OVERLAY ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.6;
+  }
+
+  /* ===== LOADING SCREEN ===== */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: var(--midnight-indigo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  #loader h2 {
+    font-family: var(--font-script);
+    color: var(--vanilla-cream);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    opacity: 0;
+    animation: fadeIn 0.8s 0.3s forwards;
+  }
+  #loader p {
+    font-family: var(--font-mono);
+    color: var(--silver-accent);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    opacity: 0;
+    animation: fadeIn 0.8s 0.8s forwards;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  /* ===== SCENE 1: COVER / CARTA ===== */
+  #scene-cover {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: 
+      radial-gradient(ellipse at 30% 20%, rgba(124, 75, 40, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 80%, rgba(28, 35, 64, 0.06) 0%, transparent 60%),
+      var(--vanilla-cream);
+    position: relative;
+    padding: 2rem;
+    overflow: hidden;
+  }
+
+  /* Subtle paper lines */
+  #scene-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent, transparent 27px, rgba(180, 160, 120, 0.15) 27px, rgba(180, 160, 120, 0.15) 28px
+    );
+    pointer-events: none;
+  }
+
+  .envelope-wrapper {
+    position: relative;
+    width: min(640px, 95vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    z-index: 2;
+  }
+
+  .envelope-top {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    transform-origin: top center;
+  }
+
+  .envelope-flap {
+    width: 100%;
+    aspect-ratio: 2/0.7;
+    background: var(--midnight-indigo);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 1rem;
+    box-shadow: 0 4px 20px rgba(28,35,64,0.25);
+    transform-origin: top center;
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .envelope-flap.open {
+    transform: rotateX(-180deg);
+  }
+
+  .envelope-body {
+    width: 100%;
+    background: var(--midnight-indigo);
+    padding: 3px;
+    position: relative;
+    box-shadow: 0 8px 40px rgba(28,35,64,0.3);
+  }
+
+  .envelope-inner {
+    background: var(--linen-white);
+    padding: 3rem 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .envelope-inner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--bordeaux) 0%, transparent 100%);
+  }
+
+  .letter-header {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--warm-grey);
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+  }
+
+  .letter-title {
+    font-family: var(--font-script);
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    color: var(--midnight-indigo);
+    line-height: 0.9;
+    margin-bottom: 0.5rem;
+    display: block;
+    position: relative;
+  }
+
+  .letter-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: var(--bordeaux);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    display: block;
+  }
+
+  .letter-body {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.9;
+    color: var(--ink-black);
+    font-weight: 300;
+    font-style: italic;
+    max-width: 480px;
+  }
+
+  .letter-body strong {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--midnight-indigo);
+  }
+
+  .letter-signature {
+    font-family: var(--font-script);
+    font-size: 2rem;
+    color: var(--bordeaux);
+    margin-top: 2rem;
+    display: block;
+    text-align: right;
+  }
+
+  /* Wax seal */
+  .wax-seal {
+    position: absolute;
+    bottom: -28px;
+    right: 3rem;
+    width: 56px;
+    height: 56px;
+    background: radial-gradient(circle at 35% 35%, var(--bordeaux-light), var(--bordeaux) 60%, #5a1220);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-script);
+    color: var(--vanilla-cream);
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(123,28,46,0.5), inset 0 1px 3px rgba(255,255,255,0.2);
+    z-index: 10;
+  }
+
+  .envelope-bottom-strip {
+    width: 100%;
+    height: 28px;
+    background: var(--midnight-indigo);
+    position: relative;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--warm-grey);
+    text-transform: uppercase;
+    animation: bounce 2s infinite;
+    z-index: 5;
+  }
+
+  .scroll-hint::after {
+    content: '';
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--warm-grey), transparent);
+    display: block;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-8px); }
+  }
+
+  /* ===== SECTION HEADERS ===== */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--bordeaux);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--midnight-indigo);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  /* ===== SCENE 2: EXPERIENCE / FICHÁRIO ===== */
+  #scene-experience {
+    background: 
+      linear-gradient(180deg, var(--aged-paper) 0%, var(--vanilla-cream) 100%);
+    padding: 6rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #scene-experience::before {
+    content: '02';
+    position: absolute;
+    right: -2rem;
+    top: 4rem;
+    font-family: var(--font-display);
+    font-size: 20rem;
+    color: rgba(28,35,64,0.03);
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .binder-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .binder-header {
+    margin-bottom: 4rem;
+    padding-left: 1rem;
+    border-left: 3px solid var(--bordeaux);
+  }
+
+  /* Tab folder system */
+  .folder-stack {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .folder-item {
+    position: relative;
+    background: var(--linen-white);
+    border: 1px solid var(--parchment);
+    margin-bottom: 0;
+    overflow: hidden;
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.06);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .folder-item:hover {
+    box-shadow: 4px 8px 24px rgba(0,0,0,0.12);
+  }
+
+  .folder-tab {
+    background: var(--midnight-indigo);
+    color: var(--vanilla-cream);
+    padding: 0.6rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+  }
+
+  .folder-tab:hover { background: var(--bordeaux); }
+
+  .folder-tab .tab-year {
+    margin-left: auto;
+    opacity: 0.6;
+    font-size: 0.65rem;
+  }
+
+  .folder-tab .tab-icon {
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    flex-shrink: 0;
+  }
+
+  .folder-content {
+    padding: 2rem 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .folder-item.expanded .folder-content {
+    max-height: 600px;
+    padding: 2rem 2.5rem;
+  }
+
+  .folder-item.expanded .folder-tab {
+    background: var(--bordeaux);
+  }
+
+  .folder-role {
+    font-family: var(--font-script);
+    font-size: 1.5rem;
+    color: var(--midnight-indigo);
+    margin-bottom: 0.25rem;
+  }
+
+  .folder-period {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--warm-grey);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .folder-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .folder-bullets li {
+    font-family: var(--font-serif);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--ink-black);
+    padding-left: 1.5rem;
+    position: relative;
+    font-weight: 300;
+  }
+
+  .folder-bullets li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--bordeaux);
+    font-family: var(--font-mono);
+  }
+
+  .folder-bullets li strong {
+    font-weight: 600;
+    color: var(--midnight-indigo);
+  }
+
+  /* Tape decoration for Foodium */
+  .tape-decoration {
+    position: absolute;
+    top: 1rem;
+    right: 2rem;
+    width: 60px;
+    height: 22px;
+    background: rgba(217, 203, 170, 0.7);
+    transform: rotate(-3deg);
+    border: 1px solid rgba(180, 160, 120, 0.5);
+  }
+
+  .ornament-frame {
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--parchment);
+    pointer-events: none;
+  }
+
+  /* Award badge in folders */
+  .award-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bordeaux);
+    color: var(--vanilla-cream);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.8rem;
+    margin-top: 0.5rem;
+  }
+
+  /* ===== SCENE 3: AWARDS / DVD ===== */
+  #scene-awards {
+    background: var(--midnight-indigo);
+    padding: 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #scene-awards::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(123,28,46,0.2) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 30%, rgba(192,184,168,0.05) 0%, transparent 50%);
+  }
+
+  .awards-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .awards-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--bordeaux-light);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .awards-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--vanilla-cream);
+    margin-bottom: 4rem;
+  }
+
+  .dvd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+  }
+
+  .dvd-case {
+    position: relative;
+    background: var(--ink-black);
+    border: 1px solid rgba(192, 184, 168, 0.15);
+    padding: 0;
+    overflow: hidden;
+    cursor: default;
+    opacity: 0;
+    transform: translateY(40px) rotateY(15deg);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    box-shadow: 6px 6px 30px rgba(0,0,0,0.5);
+  }
+
+  .dvd-case:hover {
+    transform: translateY(-8px) rotateY(0deg) scale(1.02);
+    box-shadow: 12px 20px 50px rgba(0,0,0,0.7);
+  }
+
+  .dvd-spine {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, var(--bordeaux) 0%, var(--bordeaux-light) 50%, var(--bordeaux) 100%);
+  }
+
+  .dvd-cover {
+    padding: 1.5rem;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dvd-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 3px,
+        rgba(255,255,255,0.01) 3px,
+        rgba(255,255,255,0.01) 4px
+      );
+  }
+
+  .dvd-number {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--bordeaux);
+    opacity: 0.3;
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+  }
+
+  .dvd-label-top {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--silver-accent);
+    opacity: 0.7;
+  }
+
+  .dvd-award-name {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--vanilla-cream);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-top: auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .dvd-award-year {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--bordeaux-light);
+    letter-spacing: 0.1em;
+    margin-top: 0.5rem;
+  }
+
+  .dvd-disc {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      rgba(192,184,168,0.05) 0%,
+      rgba(192,184,168,0.15) 25%,
+      rgba(192,184,168,0.05) 50%,
+      rgba(192,184,168,0.1) 75%,
+      rgba(192,184,168,0.05) 100%
+    );
+    border: 1px solid rgba(192, 184, 168, 0.1);
+    opacity: 0.5;
+  }
+
+  /* ===== SCENE 4: PHOTO BOOTH ===== */
+  #scene-photos {
+    background: var(--aged-paper);
+    padding: 7rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #scene-photos::before {
+    content: '04';
+    position: absolute;
+    left: -2rem;
+    bottom: 2rem;
+    font-family: var(--font-display);
+    font-size: 18rem;
+    color: rgba(28,35,64,0.04);
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .photo-booth-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .booth-header {
+    margin-bottom: 3rem;
+    padding-left: 1rem;
+    border-left: 3px solid var(--bordeaux);
+  }
+
+  .photo-strip {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    perspective: 1200px;
+  }
+
+  .photo-frame {
+    background: white;
+    padding: 0.9rem 0.9rem 2.5rem;
+    box-shadow: 
+      0 4px 8px rgba(0,0,0,0.12),
+      0 12px 30px rgba(0,0,0,0.08),
+      inset 0 0 0 1px rgba(0,0,0,0.04);
+    position: relative;
+    opacity: 0;
+    transform: translateY(60px) rotate(var(--rot, 0deg));
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+    flex: 0 0 auto;
+    width: 200px;
+  }
+
+  .photo-frame:nth-child(1) { --rot: -3deg; }
+  .photo-frame:nth-child(2) { --rot: 1.5deg; }
+  .photo-frame:nth-child(3) { --rot: -1deg; }
+
+  .photo-frame:hover {
+    transform: translateY(-12px) rotate(0deg) scale(1.05);
+    box-shadow: 
+      0 20px 50px rgba(0,0,0,0.2),
+      inset 0 0 0 1px rgba(0,0,0,0.04);
+    z-index: 10;
+  }
+
+  .photo-frame img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    filter: contrast(1.05) saturate(0.9);
+  }
+
+  .photo-caption {
+    position: absolute;
+    bottom: 0.6rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--warm-grey);
+    letter-spacing: 0.05em;
+  }
+
+  .photo-date {
+    font-size: 0.55rem;
+    color: var(--bordeaux);
+    font-family: var(--font-mono);
+    display: block;
+    text-align: center;
+    margin-top: 0.2rem;
+  }
+
+  .instagram-cta {
+    text-align: center;
+    margin-top: 3rem;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .btn-bordeaux {
+    display: inline-block;
+    border: 1.5px solid var(--bordeaux);
+    color: var(--bordeaux);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.5rem;
+    text-decoration: none;
+    transition: background 0.3s, color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-bordeaux::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--bordeaux);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+    z-index: -1;
+  }
+
+  .btn-bordeaux:hover { color: var(--vanilla-cream); }
+  .btn-bordeaux:hover::before { transform: scaleX(1); }
+
+  /* ===== SCENE 5: ABOUT / TYPEWRITER ===== */
+  #scene-about {
+    background: var(--linen-white);
+    padding: 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Typewriter machine visual */
+  .typewriter-machine {
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .machine-top {
+    background: var(--midnight-indigo);
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 -2px 0 rgba(255,255,255,0.05) inset;
+  }
+
+  .machine-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--bordeaux);
+    opacity: 0.8;
+  }
+  .machine-dot:nth-child(2) { opacity: 0.5; }
+  .machine-dot:nth-child(3) { background: var(--parchment); opacity: 0.4; }
+
+  .machine-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+
+  .paper-roll {
+    background: var(--linen-white);
+    border: 1px solid var(--parchment);
+    border-top: none;
+    padding: 3rem 3rem 4rem;
+    position: relative;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    min-height: 320px;
+  }
+
+  .paper-roll::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--silver-accent), transparent);
+    opacity: 0.5;
+  }
+
+  /* Line guide */
+  .paper-roll::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 3.5rem;
+    width: 1px;
+    background: rgba(220, 180, 180, 0.3);
+    pointer-events: none;
+  }
+
+  .typewriter-text {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--ink-black);
+    white-space: pre-wrap;
+    position: relative;
+    min-height: 200px;
+    padding-left: 1.5rem;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: var(--bordeaux);
+    vertical-align: text-bottom;
+    animation: blink 0.8s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .typewriter-signature {
+    font-family: var(--font-script);
+    font-size: 2.5rem;
+    color: var(--bordeaux);
+    text-align: right;
+    display: block;
+    margin-top: 2rem;
+    padding-right: 1rem;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  /* Skills grid */
+  .skills-section {
+    max-width: 900px;
+    margin: 6rem auto 0;
+  }
+
+  .skills-header {
+    border-left: 3px solid var(--bordeaux);
+    padding-left: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .skill-card {
+    border: 1px solid var(--parchment);
+    padding: 1.5rem;
+    background: var(--vanilla-cream);
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .skill-card-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--bordeaux);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .skill-card-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--midnight-indigo);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .skill-card p {
+    font-family: var(--font-serif);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--warm-grey);
+    font-weight: 300;
+  }
+
+  /* ===== SCENE FINAL: LACE FRAME ===== */
+  #scene-final {
+    background: var(--vanilla-cream);
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .lace-frame-wrapper {
+    position: relative;
+    display: inline-block;
+    max-width: 560px;
+    width: 100%;
+    opacity: 0;
+  }
+
+  /* SVG lace doily */
+  .lace-svg {
+    width: 100%;
+    height: auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .lace-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 60%;
+    text-align: center;
+  }
+
+  .lace-quote {
+    font-family: var(--font-script);
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    color: var(--bordeaux);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* ===== FOOTER ===== */
+  #footer {
+    background: var(--midnight-indigo);
+    padding: 4rem 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+  #footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, var(--bordeaux), transparent);
+  }
+
+  .footer-name {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--vanilla-cream);
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+  }
+
+  .footer-meta {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--silver-accent);
+    letter-spacing: 0.15em;
+    line-height: 2;
+    opacity: 0.7;
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-link {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--vanilla-cream);
+    text-decoration: none;
+    border-bottom: 1px solid var(--bordeaux);
+    padding-bottom: 2px;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+  }
+
+  .footer-link:hover { opacity: 1; color: var(--bordeaux-light); }
+
+  .footer-status {
+    margin-top: 3rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: rgba(192,184,168,0.3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .footer-status span {
+    color: var(--bordeaux-light);
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bordeaux-light);
+    vertical-align: middle;
+    margin-right: 0.5rem;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ===== EDUCATION ROW ===== */
+  .education-strip {
+    background: var(--bordeaux);
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .education-strip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(255,255,255,0.03) 10px,
+      rgba(255,255,255,0.03) 11px
+    );
+  }
+
+  .edu-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .edu-item {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .edu-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+
+  .edu-school {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--vanilla-cream);
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .edu-course {
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    color: rgba(245,239,227,0.75);
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .photo-strip { flex-direction: column; align-items: center; }
+    .photo-frame { width: 220px; }
+    .paper-roll { padding: 2rem 1.5rem 3rem; }
+    .paper-roll::after { left: 2rem; }
+    .typewriter-text { padding-left: 0; }
+    .folder-content { padding: 1.5rem; }
+    .lace-content { width: 70%; }
+    .dvd-grid { grid-template-columns: 1fr; }
+    .envelope-inner { padding: 2rem 1.5rem; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* visible state for scroll reveals */
+  .revealed {
+    opacity: 1 !important;
+    transform: translateY(0) rotate(var(--rot, 0deg)) !important;
+  }
+
+  .dvd-revealed {
+    opacity: 1 !important;
+    transform: translateY(0) rotateY(0deg) !important;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <h2>Pietra Cordero</h2>
+  <p>Carregando arquivo... / Loading archive...</p>
+</div>
+
+<!-- SCENE 1: CAPA / CARTA -->
+<section id="scene-cover">
+  <div class="envelope-wrapper">
+    <div class="envelope-top">
+      <div class="envelope-flap" id="envelopeFlap">
+        <!-- triangle flap is via clip-path -->
+      </div>
+    </div>
+    <div class="envelope-body">
+      <div class="envelope-inner" id="letterContent">
+        <div class="letter-header">São Paulo, SP — Brasil &nbsp;·&nbsp; 2026</div>
+        
+        <span class="letter-subtitle">Portfolio · Archive · Dossier</span>
+        <span class="letter-title">Pietra Cordero</span>
+        
+        <p class="letter-body">
+          Bem-vinda ao meu arquivo. Sou uma estudante de 
+          <strong>Gestão de Tecnologia da Informação</strong> apaixonada 
+          por criar ecossistemas digitais que unem tecnologia de ponta 
+          a experiências genuinamente humanas.<br><br>
+          Aqui você encontrará projetos, experiências e uma parte da 
+          pessoa que os construiu — documentados como páginas de um 
+          diário que ainda está sendo escrito.
+        </p>
+        
+        <span class="letter-signature">com carinho, Pietra ✦</span>
+        
+        <div class="wax-seal">P</div>
+      </div>
+    </div>
+    <div class="envelope-bottom-strip"></div>
+  </div>
+  
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<!-- SCENE 2: EXPERIÊNCIA / FICHÁRIO -->
+<section id="scene-experience">
+  <div class="binder-container">
+    <div class="binder-header">
+      <span class="section-label">Cena 02 — Fichário de Projetos</span>
+      <h2 class="section-title">Experiência &amp;<br>Projetos</h2>
+    </div>
+    
+    <div class="folder-stack">
+
+      <!-- CORTEX -->
+      <div class="folder-item" data-reveal>
+        <div class="folder-tab" onclick="toggleFolder(this)">
+          <div class="tab-icon">✦</div>
+          Cortex — Customer Success Ops
+          <span class="tab-year">Ago 2025 → Presente</span>
+        </div>
+        <div class="folder-content">
+          <div>
+            <div class="folder-role">Estagiária de Operações</div>
+            <div class="folder-period">// Agosto 2025 – Presente</div>
+          </div>
+          <ul class="folder-bullets">
+            <li><strong>Colaboração Humano-IA:</strong> Integração de LLMs em fluxos operacionais, automatizando tarefas com supervisão crítica humana para garantir confiabilidade técnica e nuances culturais.</li>
+            <li><strong>Engenharia de Prompts:</strong> Criação e iteração de prompts complexos para geração de códigos (Google App Script) e relatórios executivos, com foco na eliminação de alucinações.</li>
+            <li><strong>Auditoria & Fact-Checking:</strong> Verificação de dados em CRMs (HubSpot e Vitally), cruzando insights de IA com fontes de mercado.</li>
+            <li><strong>Power BI:</strong> Construção e manutenção de painéis analíticos para monitorar volumetria e padrões de erros em datasets.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- HOSPITAL SABARÁ -->
+      <div class="folder-item" data-reveal>
+        <div class="folder-tab" onclick="toggleFolder(this)">
+          <div class="tab-icon">◆</div>
+          Challenge × Hospital Infantil Sabará
+          <span class="tab-year">2026 — Em andamento</span>
+        </div>
+        <div class="folder-content">
+          <div>
+            <div class="folder-role">Idealizadora & Desenvolvedora</div>
+            <div class="folder-period">// Em andamento (2026)</div>
+          </div>
+          <ul class="folder-bullets">
+            <li><strong>Copiloto Pediátrico com IA:</strong> Plataforma integrada para navegação inteligente da jornada de saúde, centralização de históricos médicos e geração de alertas preventivos aos pais.</li>
+            <li><strong>Ecossistema Digital:</strong> Arquitetura de solução que transforma a experiência de famílias com crianças de alta complexidade, reduzindo a fragmentação do cuidado médico.</li>
+            <li><strong>IA Preditiva:</strong> Identificação precoce de sinais de agravamento clínico e suporte diagnóstico de doenças raras.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- FOODIUM -->
+      <div class="folder-item" data-reveal style="position:relative;">
+        <div class="tape-decoration"></div>
+        <div class="folder-tab" onclick="toggleFolder(this)" style="background: #2a3560;">
+          <div class="tab-icon">⬡</div>
+          Projeto Foodium — Global Solution 2026 (FIAP)
+          <span class="tab-year">2026 — Concluído</span>
+        </div>
+        <div class="folder-content">
+          <div>
+            <div class="folder-role">Lead Developer & System Architect</div>
+            <div class="folder-period">// Concluído (2026) · Space Connect Edition</div>
+          </div>
+          <ul class="folder-bullets">
+            <li><strong>Arquitetura CLLSS:</strong> Ecossistema alimentar autônomo para ambientes extremos (Marte + vulnerabilidade urbana) integrando reciclagem de CO₂ à produção de microalgas com 45-48% de teor proteico.</li>
+            <li><strong>Automação de Precisão:</strong> Malhas de controle aeropônicas com emissores fogger (14 L/h), garantindo economia hídrica superior a 90% e incremento de 17% na tuberização.</li>
+            <li><strong>Dashboard IoT + ML:</strong> Interface de telemetria em tempo real com modelos de manutenção preditiva e dados satelitais.</li>
+            <li><strong>BioSim Python:</strong> Framework de simulação computacional para testes estocásticos, alinhado aos ODS 2, 9, 11 e 13 da ONU.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CEAP -->
+      <div class="folder-item" data-reveal>
+        <div class="folder-tab" onclick="toggleFolder(this)">
+          <div class="tab-icon">★</div>
+          Smart Solution × CEAP — 3° Lugar
+          <span class="tab-year">2025 — Concluído</span>
+        </div>
+        <div class="folder-content">
+          <div>
+            <div class="folder-role">Desenvolvedora de Software</div>
+            <div class="folder-period">// Concluído (2025) · Apresentado no NEXT/FIAP</div>
+            <div class="award-badge">★ 3° LUGAR GERAL</div>
+          </div>
+          <ul class="folder-bullets">
+            <li><strong>Plataforma Interna:</strong> Sistema completo focado na otimização de processos operacionais e corporativos para a empresa CEAP.</li>
+            <li><strong>Impacto:</strong> Centralização de fluxos de dados e interfaces funcionais para aprimorar comunicação interna e tomada de decisões gerenciais.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION STRIP -->
+<div class="education-strip">
+  <div class="edu-inner">
+    <div class="edu-item" data-reveal>
+      <span class="edu-label">Graduação em andamento</span>
+      <div class="edu-school">FIAP</div>
+      <div class="edu-course">Gestão de Tecnologia da Informação (Previsão: Dez 2026)</div>
+    </div>
+    <div class="edu-item" data-reveal>
+      <span class="edu-label">Técnico concluído</span>
+      <div class="edu-school">ETEC</div>
+      <div class="edu-course">Técnico em Recursos Humanos (2022–2024)</div>
+    </div>
+    <div class="edu-item" data-reveal>
+      <span class="edu-label">Idiomas</span>
+      <div class="edu-school">Português & English</div>
+      <div class="edu-course">Nativo · Fluente / Avançado</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 3: AWARDS / DVD -->
+<section id="scene-awards">
+  <div class="awards-inner">
+    <span class="awards-label">Cena 03 — The Ditto Collection</span>
+    <h2 class="awards-title">Reconhecimentos</h2>
+    
+    <div class="dvd-grid">
+      
+      <div class="dvd-case" data-dvd>
+        <div class="dvd-spine"></div>
+        <div class="dvd-cover">
+          <div class="dvd-disc"></div>
+          <span class="dvd-label-top">FIAP · Global Solution 2025</span>
+          <div>
+            <div class="dvd-award-name">1° Lugar<br>Protect the<br>Future</div>
+            <div class="dvd-award-year">// 2025 · Inovação Tecnológica</div>
+          </div>
+          <div class="dvd-number">01</div>
+        </div>
+      </div>
+      
+      <div class="dvd-case" data-dvd>
+        <div class="dvd-spine"></div>
+        <div class="dvd-cover">
+          <div class="dvd-disc"></div>
+          <span class="dvd-label-top">Challenge CEAP × FIAP</span>
+          <div>
+            <div class="dvd-award-name">3° Lugar<br>Smart<br>Solution</div>
+            <div class="dvd-award-year">// 2025 · Apresentado no NEXT</div>
+          </div>
+          <div class="dvd-number">02</div>
+        </div>
+      </div>
+      
+      <div class="dvd-case" data-dvd>
+        <div class="dvd-spine"></div>
+        <div class="dvd-cover">
+          <div class="dvd-disc"></div>
+          <span class="dvd-label-top">OBMEP · 2024</span>
+          <div>
+            <div class="dvd-award-name">Medalha<br>de Prata<br>Matemática</div>
+            <div class="dvd-award-year">// 2024 · Excelência em Lógica</div>
+          </div>
+          <div class="dvd-number">03</div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<!-- SCENE 4: PHOTO BOOTH -->
+<section id="scene-photos">
+  <div class="photo-booth-inner">
+    <div class="booth-header">
+      <span class="section-label">Cena 04 — The Photo Booth</span>
+      <h2 class="section-title">Galeria Pessoal</h2>
+    </div>
+    
+    <div class="photo-strip">
+      <div class="photo-frame" data-photo>
+        <img src="pietra1.jpeg" alt="Pietra Cordero" loading="lazy">
+        <div class="photo-caption">São Paulo, BR</div>
+        <span class="photo-date">2025 ✦</span>
+      </div>
+      <div class="photo-frame" data-photo>
+        <img src="pietra2.jpeg" alt="Pietra Cordero" loading="lazy">
+        <div class="photo-caption">in transit...</div>
+        <span class="photo-date">2025 ✦</span>
+      </div>
+      <div class="photo-frame" data-photo>
+        <img src="pietra3.jpeg" alt="Pietra Cordero" loading="lazy">
+        <div class="photo-caption">pietra.cordero</div>
+        <span class="photo-date">2025 ✦</span>
+      </div>
+    </div>
+    
+    <div class="instagram-cta" data-reveal-cta>
+      <a href="https://www.instagram.com/pietra.cordero" target="_blank" class="btn-bordeaux">
+        Follow the journey: @pietra.cordero →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- SCENE 5: ABOUT / TYPEWRITER -->
+<section id="scene-about">
+  <div style="max-width:700px; margin: 0 auto; padding: 0 2rem 6rem;">
+    <div style="border-left: 3px solid var(--bordeaux); padding-left:1rem; margin-bottom:3rem;">
+      <span class="section-label">Cena 05 — A Máquina de Escrever</span>
+      <h2 class="section-title">Sobre Mim</h2>
+    </div>
+
+    <div class="typewriter-machine">
+      <div class="machine-top">
+        <div class="machine-dot"></div>
+        <div class="machine-dot"></div>
+        <div class="machine-dot"></div>
+        <span class="machine-label">pietra_cordero.txt — composing...</span>
+      </div>
+      <div class="paper-roll">
+        <div class="typewriter-text" id="typewriterOutput"><span class="cursor"></span></div>
+        <span class="typewriter-signature" id="typedSignature">Pietra ✦</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="skills-section" style="padding: 0 2rem;">
+    <div class="skills-header">
+      <span class="section-label">Stack & Competências</span>
+      <h3 class="section-title" style="font-size: clamp(1.5rem, 3vw, 2rem);">O que eu construo</h3>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card" data-reveal>
+        <span class="skill-card-label">01 · Analytics</span>
+        <div class="skill-card-title">Business Intelligence</div>
+        <p>Power BI, DAX, ETL via Power Query. Construção de dashboards analíticos e modelagem avançada de dados.</p>
+      </div>
+      <div class="skill-card" data-reveal>
+        <span class="skill-card-label">02 · AI</span>
+        <div class="skill-card-title">Engenharia de IA</div>
+        <p>Prompt engineering, mitigação de alucinações em LLMs, automação com Google App Script, auditoria de dados ASR.</p>
+      </div>
+      <div class="skill-card" data-reveal>
+        <span class="skill-card-label">03 · Design</span>
+        <div class="skill-card-title">UX/UI & Produto</div>
+        <p>Mapeamento de jornada do cliente, personas, design estratégico e consistência visual multimodal.</p>
+      </div>
+      <div class="skill-card" data-reveal>
+        <span class="skill-card-label">04 · Data</span>
+        <div class="skill-card-title">Pesquisa & Auditoria</div>
+        <p>Web research avançado, fact-checking, CRM (HubSpot/Vitally), governança LGPD e relatórios executivos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENE FINAL: LACE FRAME -->
+<section id="scene-final">
+  <div style="display:flex; flex-direction:column; align-items:center; gap:3rem;">
+    
+    <div style="border-left: 3px solid var(--bordeaux); padding-left:1rem; align-self:flex-start; max-width:900px; width:100%; margin: 0 auto;">
+      <span class="section-label">Gran Finale — A Moldura de Renda</span>
+    </div>
+
+    <div class="lace-frame-wrapper" id="laceFrame">
+      <!-- SVG Lace Doily -->
+      <svg class="lace-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <filter id="lace-shadow">
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(28,35,64,0.1)"/>
+          </filter>
+        </defs>
+        <!-- Outer ring -->
+        <circle cx="250" cy="250" r="235" fill="none" stroke="#D9CBAA" stroke-width="1.5" opacity="0.7"/>
+        <circle cx="250" cy="250" r="220" fill="none" stroke="#D9CBAA" stroke-width="0.5" opacity="0.5"/>
+        
+        <!-- Lace petals outer -->
+        <g opacity="0.6">
+          <!-- 16 outer petal arches -->
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(0 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(22.5 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(45 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(67.5 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(90 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(112.5 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(135 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(157.5 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(180 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(202.5 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(225 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(247.5 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(270 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(292.5 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(315 250 250)"/>
+          <path d="M250 15 Q280 50 250 85 Q220 50 250 15" fill="none" stroke="#C0B8A8" stroke-width="1" transform="rotate(337.5 250 250)"/>
+        </g>
+
+        <!-- Middle decorative ring -->
+        <circle cx="250" cy="250" r="160" fill="none" stroke="#D9CBAA" stroke-width="1" opacity="0.6" stroke-dasharray="4 6"/>
+        <circle cx="250" cy="250" r="140" fill="none" stroke="#C0B8A8" stroke-width="0.5" opacity="0.4"/>
+
+        <!-- Inner spoke lines -->
+        <g opacity="0.35" stroke="#C0B8A8" stroke-width="0.5">
+          <line x1="250" y1="90" x2="250" y2="410" transform="rotate(0 250 250)"/>
+          <line x1="250" y1="90" x2="250" y2="410" transform="rotate(22.5 250 250)"/>
+          <line x1="250" y1="90" x2="250" y2="410" transform="rotate(45 250 250)"/>
+          <line x1="250" y1="90" x2="250" y2="410" transform="rotate(67.5 250 250)"/>
+          <line x1="250" y1="90" x2="250" y2="410" transform="rotate(90 250 250)"/>
+          <line x1="250" y1="90" x2="250" y2="410" transform="rotate(112.5 250 250)"/>
+          <line x1="250" y1="90" x2="250" y2="410" transform="rotate(135 250 250)"/>
+          <line x1="250" y1="90" x2="250" y2="410" transform="rotate(157.5 250 250)"/>
+        </g>
+
+        <!-- Inner ring -->
+        <circle cx="250" cy="250" r="110" fill="rgba(250,246,238,0.5)" stroke="#C0B8A8" stroke-width="1.5" opacity="0.8"/>
+        <circle cx="250" cy="250" r="95" fill="none" stroke="#D9CBAA" stroke-width="0.5" opacity="0.6"/>
+
+        <!-- Small ornament dots on outer ring -->
+        <g fill="#C0B8A8" opacity="0.5">
+          <circle cx="250" cy="15" r="2.5" transform="rotate(0 250 250)"/>
+          <circle cx="250" cy="15" r="2.5" transform="rotate(45 250 250)"/>
+          <circle cx="250" cy="15" r="2.5" transform="rotate(90 250 250)"/>
+          <circle cx="250" cy="15" r="2.5" transform="rotate(135 250 250)"/>
+          <circle cx="250" cy="15" r="2.5" transform="rotate(180 250 250)"/>
+          <circle cx="250" cy="15" r="2.5" transform="rotate(225 250 250)"/>
+          <circle cx="250" cy="15" r="2.5" transform="rotate(270 250 250)"/>
+          <circle cx="250" cy="15" r="2.5" transform="rotate(315 250 250)"/>
+        </g>
+      </svg>
+
+      <!-- Text centered in lace -->
+      <div class="lace-content">
+        <p class="lace-quote">
+          "this one...<br>or that one?<br>try both.<br>
+          <em style="font-size:0.9em; opacity:0.8;">Built to stack<br>and style your way"</em>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <span class="footer-name">Pietra Cordero</span>
+  <div class="footer-meta">
+    São Paulo, SP — Brasil<br>
+    pietracordero10@gmail.com<br>
+    Graduanda em Gestão de TI @ FIAP (2026)
+  </div>
+  <div class="footer-links">
+    <a href="https://www.linkedin.com/in/pietra-cordero-b88337253" target="_blank" class="footer-link">LinkedIn</a>
+    <a href="https://www.instagram.com/pietra.cordero" target="_blank" class="footer-link">Instagram</a>
+    <a href="mailto:pietracordero10@gmail.com" class="footer-link">Email</a>
+  </div>
+  <div class="footer-status">
+    <span></span>Available for new opportunities · 2026
+  </div>
+</footer>
+
+<script>
+// ===== LOADER =====
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.getElementById('loader');
+    gsap.to(loader, { 
+      opacity: 0, 
+      duration: 0.8, 
+      ease: 'power2.inOut',
+      onComplete: () => { loader.style.display = 'none'; }
+    });
+    // Open envelope after loader
+    setTimeout(() => {
+      document.getElementById('envelopeFlap').classList.add('open');
+    }, 400);
+  }, 1800);
+});
+
+// ===== FOLDER TOGGLE =====
+function toggleFolder(tab) {
+  const item = tab.parentElement;
+  const isExpanded = item.classList.contains('expanded');
+  // Close all
+  document.querySelectorAll('.folder-item.expanded').forEach(el => el.classList.remove('expanded'));
+  if (!isExpanded) item.classList.add('expanded');
+}
+
+// ===== SCROLL REVEAL =====
+function isInViewport(el, offset = 100) {
+  const rect = el.getBoundingClientRect();
+  return rect.top < window.innerHeight - offset;
+}
+
+function revealOnScroll() {
+  // General reveals
+  document.querySelectorAll('[data-reveal]:not(.revealed)').forEach(el => {
+    if (isInViewport(el, 80)) {
+      setTimeout(() => el.classList.add('revealed'), 100);
+    }
+  });
+
+  // DVD cases
+  document.querySelectorAll('[data-dvd]:not(.dvd-revealed)').forEach((el, i) => {
+    if (isInViewport(el, 60)) {
+      setTimeout(() => el.classList.add('dvd-revealed'), i * 150);
+    }
+  });
+
+  // Photo frames
+  document.querySelectorAll('[data-photo]:not(.revealed)').forEach((el, i) => {
+    if (isInViewport(el, 60)) {
+      setTimeout(() => el.classList.add('revealed'), i * 200);
+    }
+  });
+
+  // Instagram CTA
+  const cta = document.querySelector('[data-reveal-cta]:not(.revealed)');
+  if (cta && isInViewport(cta, 60)) cta.classList.add('revealed');
+
+  // Lace frame
+  const lace = document.getElementById('laceFrame');
+  if (lace && isInViewport(lace, 80) && !lace.classList.contains('lace-shown')) {
+    lace.classList.add('lace-shown');
+    gsap.to(lace, { opacity: 1, duration: 1.2, ease: 'power2.out' });
+    gsap.from(lace, { scale: 0.85, duration: 1.2, ease: 'power2.out' });
+  }
+}
+
+// CSS transition for reveal-cta
+document.querySelector('[data-reveal-cta]').style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+document.querySelectorAll('[data-reveal-cta].revealed').forEach(el => {
+  el.style.opacity = '1';
+  el.style.transform = 'translateY(0)';
+});
+
+// ===== TYPEWRITER =====
+const aboutText = `Meu nome é Pietra Cordero.
+
+Sou de São Paulo e estudo Gestão de Tecnologia 
+da Informação na FIAP — mas minha formação 
+real acontece na interseção entre dado, design 
+e o ser humano do outro lado da tela.
+
+Tenho fascinação por sistemas que funcionam 
+como organismos vivos: conectados, adaptativos 
+e centrados em quem os usa.
+
+Quando não estou construindo ecossistemas 
+digitais, estou explorando a cidade, colecionando 
+referências visuais e traduzindo o caos criativo 
+em estruturas que fazem sentido.
+
+Acredito que a tecnologia mais poderosa é 
+aquela que parece invisível — porque simplesmente 
+funciona, e funciona para as pessoas certas.
+
+`;
+
+let typewriterStarted = false;
+let charIndex = 0;
+
+function startTypewriter() {
+  if (typewriterStarted) return;
+  typewriterStarted = true;
+  
+  const output = document.getElementById('typewriterOutput');
+  const signature = document.getElementById('typedSignature');
+  
+  function type() {
+    if (charIndex < aboutText.length) {
+      const char = aboutText[charIndex];
+      const cursor = output.querySelector('.cursor');
+      if (cursor) cursor.remove();
+      
+      const textNode = document.createTextNode(char);
+      output.appendChild(textNode);
+      
+      const newCursor = document.createElement('span');
+      newCursor.className = 'cursor';
+      output.appendChild(newCursor);
+      
+      charIndex++;
+      const delay = char === '\n' ? 80 : (char === '.' || char === ',' ? 120 : 35);
+      setTimeout(type, delay);
+    } else {
+      // Remove cursor, show signature
+      const cursor = output.querySelector('.cursor');
+      if (cursor) cursor.remove();
+      signature.style.opacity = '1';
+    }
+  }
+  type();
+}
+
+// Check typewriter section
+function checkTypewriter() {
+  const section = document.getElementById('scene-about');
+  if (section && isInViewport(section, 200)) {
+    startTypewriter();
+  }
+}
+
+// ===== SCROLL HANDLER =====
+let ticking = false;
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    requestAnimationFrame(() => {
+      revealOnScroll();
+      checkTypewriter();
+      ticking = false;
+    });
+    ticking = true;
+  }
+});
+
+// Initial check
+setTimeout(revealOnScroll, 2200);
+setTimeout(checkTypewriter, 2200);
+
+// Apply transitions to reveal elements
+document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+  el.style.transition = `opacity 0.6s ease ${i * 0.05}s, transform 0.6s ease ${i * 0.05}s`;
+});
+document.querySelectorAll('[data-dvd]').forEach(el => {
+  el.style.transition = `opacity 0.7s ease, transform 0.7s ease, box-shadow 0.4s ease`;
+});
+document.querySelectorAll('[data-photo]').forEach(el => {
+  el.style.transition = `opacity 0.6s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease`;
+});
+
+// For the instagram CTA
+const cta = document.querySelector('[data-reveal-cta]');
+if(cta) {
+  const origTransition = 'opacity 0.8s ease, transform 0.8s ease';
+  cta.style.transition = origTransition;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.3 });
+  observer.observe(cta);
+}
+
+// Skill cards observer
+document.querySelectorAll('.skill-card[data-reveal]').forEach((card, i) => {
+  card.style.transition = `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`;
+});
+
+// Auto-open first folder
+setTimeout(() => {
+  const firstFolder = document.querySelector('.folder-item');
+  if (firstFolder) firstFolder.classList.add('expanded');
+}, 2500);
+</script>
+</body>
+</html>
